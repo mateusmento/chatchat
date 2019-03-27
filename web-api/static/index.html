@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+	<title>Socket.IO chat</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<ul id="messages"></ul>
+	<form action="">
+		<input id="m" autocomplete="off" /><button>Send</button>
+	</form>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+	<script>
+
+		let username = prompt('type your name');
+
+		$(function(){
+
+			let socket = io();
+
+			socket.emit('user connected', username);
+
+			$('form').submit((e) => {
+				e.preventDefault();
+
+				let message = $('#m').val().trim();
+
+				if (message.indexOf('/') == 0)
+				{
+					let friend = message.slice(1, message.indexOf(' '));
+					message = message.slice(message.indexOf(' ') + 1);
+					socket.emit('private chat message', {username, message, friend});
+				}
+				else
+				{
+					socket.emit('chat message', {message, username});
+				}
+
+				$('#messages').append($('<li>').text(`you: ${message}`));
+				$('#m').val('');
+				return false;
+			});
+
+			socket.on('chat message', (msg) => {
+				$('#messages').append($('<li>').text(msg));
+			});
+
+		});
+	</script>
+
+</body>
+</html>
